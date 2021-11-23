@@ -1,6 +1,6 @@
 from application import db
 
-class Task(db.Model):
+class Tasks(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    complete = db.Column(db.String(10))
-    task = db.Column(db.String(200))
+    description = db.Column(db.String(30), nullable=False)
+    completed = db.Column(db.Boolean, nullable=False, default=False)

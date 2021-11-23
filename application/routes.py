@@ -1,31 +1,69 @@
 from application import app, db
-from application.models import Task
-
-@app.route('/add/<checkComplete>/<newTask>')
-def add(checkComplete, newTask):
-    new_task = Task(complete=checkComplete , task=newTask)
-    db.session.add(new_task)
-    db.session.commit()
-    return f"Added {new_task.task} Currently {new_task.complete}"
+from application.models import Tasks
+from application.forms import TaskForm
+from flask import render_template, request, redirect, url_for, jsonify
+from os import getenv
 
 @app.route('/')
-@app.route('/read')
-def read():
-    all_task = Task.query.all()
-    task_string = ""
-    for task in all_task:
-        task_string += "<br>" + str(task.id) + " " + task.complete + " " + task.task
-    return f"the tasks are: <br> <strong>ID</strong> <strong>progress</strong> <strong>task</strong>{task_string}"
+@app.route('/home')
+def home():
+    all_tasks = Tasks.query.all()
+    return render_template('index.html', title="Home", all_tasks=all_tasks)
 
-@app.route('/update/<int:idnum>/<descript>')
-def update(idnum, descript):
-    task_change = Task.query.get(idnum)
-    task_change.task = descript
-    db.session.commit()
-    return f"changed task {idnum} into {task_change.task}"
+@app.route('/create/task', methods=['GET','POST'])
+def create_task():
+    form = TaskForm()
 
-@app.route('/delete/<int:idnum>')
-def delete(idnum):
-    delete_task = Task.query.filter_by(id = idnum).delete()
+    if request.method == "POST":
+        new_task = Tasks(description=form.description.data)
+        db.session.add(new_task)
+        db.session.commit()
+        return redirect(url_for('home'))
+
+    return render_template("create_task.html", title="Add a new Task", form=form)
+
+@app.route('/read/allTasks')
+def read_tasks():
+    all_tasks = Tasks.query.all()
+    tasks_dict = {"tasks": []}
+    for task in all_tasks:
+        tasks_dict["tasks"].append(
+            {
+                "description": task.description,
+                "completed": task.completed
+            }
+        )
+    return jsonify(tasks_dict)
+
+@app.route('/update/task/<int:id>', methods=['GET','POST'])
+def update_task(id):
+    form = TaskForm()
+    task = Tasks.query.get(id)
+
+    if request.method == "POST":
+        task.description = form.description.data
+        db.session.commit()
+        return redirect(url_for('home'))
+
+    return render_template('update_task.html', task=task, form=form)
+
+@app.route('/delete/task/<int:id>')
+def delete_task(id):
+    task = Tasks.query.get(id)
+    db.session.delete(task)
     db.session.commit()
-    return "Deleted task"
+    return redirect(url_for('home'))
+
+@app.route('/complete/task/<int:id>')
+def complete_task(id):
+    task = Tasks.query.get(id)
+    task.completed = True
+    db.session.commit()
+    return redirect(url_for('home'))
+
+@app.route('/incomplete/task/<int:id>')
+def incomplete_task(id):
+    task = Tasks.query.get(id)
+    task.completed = False
+    db.session.commit()
+    return redirect(url_for('home'))

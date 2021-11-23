@@ -1,8 +1,7 @@
-venv
-__pycache__
-requirements.txt
+db_credentials
 *.db
 
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
