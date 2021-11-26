@@ -7,7 +7,8 @@ sudo apt-get update
 sudo apt install curl -y
 curl https://get.docker.com | sudo bash
 
-sudo usermod -aG docker $(whoami)
+sudo usermod -aG docker jenkins
+newgrp docker
 sudo apt update
 sudo apt install -y curl jq
 version=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r '.tag_name')
