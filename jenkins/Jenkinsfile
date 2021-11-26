@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    enviroment {
+        DOCKER_HUB_CREDS = credentials("DOCKER_HUB_CREDS")
+        DOCKER_HUB_PASSWORD = credentials("DOCKER_HUB_PSW")
+    }
     stages {
         stage('Setup') {
             steps {
