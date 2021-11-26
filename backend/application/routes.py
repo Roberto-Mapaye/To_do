@@ -47,12 +47,12 @@ def update_task(id):
 
     return render_template('update_task.html', task=task, form=form)
 
-@app.route('/delete/task/<int:id>')
+@app.route('/delete/task/<int:id>', methods=['DELETE'])
 def delete_task(id):
     task = Tasks.query.get(id)
     db.session.delete(task)
     db.session.commit()
-    return redirect(url_for('home'))
+    return Response(f"Deleted task with ID: {id}", mimetype='text/plain')
 
 @app.route('/complete/task/<int:id>')
 def complete_task(id):
